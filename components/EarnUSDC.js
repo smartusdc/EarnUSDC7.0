@@ -967,9 +967,9 @@ export const EarnUSDC = () => {
             wsProvider.disconnect();
         }
 
-        wsProvider = new Web3.providers.WebsocketProvider(
-            'wss://base-mainnet.blastapi.io/ws'
-        );
+ wsProvider = new Web3.providers.WebsocketProvider(
+    'wss://base.getblock.io/websocket'  // あるいは他の有効なBase NetworkのWebSocket URL
+);
 
         wsProvider.on('connect', () => {
             const wsWeb3 = new Web3(wsProvider);
