@@ -671,26 +671,33 @@ async function handleGenerateReferral() {
                 `}
 
                 <!-- 残高サマリー -->
-                <div class="p-4 border-b">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <div class="text-sm text-gray-500">USDC Balance</div>
-                            <div class="font-bold">${formatUSDC(usdcBalance)} USDC</div>
-                        </div>
-                        <div>
-                            <div class="text-sm text-gray-500">Deposit Balance</div>
-                            <div class="font-bold">${formatUSDC(depositBalance)} USDC</div>
-                        </div>
-                        <div>
-                            <div class="text-sm text-gray-500">Deposit Rewards</div>
-                            <div class="font-bold">${formatUSDC(depositRewards)} USDC</div>
-                        </div>
-                        <div>
-                            <div class="text-sm text-gray-500">Referral Rewards</div>
-                            <div class="font-bold">${formatUSDC(referralRewards)} USDC</div>
-                        </div>
-                    </div>
-                </div>
+               <div class="p-4 border-b">
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <div class="text-sm text-gray-500">USDC Balance</div>
+            <div class="font-bold balance-display" title="${formatUSDC(usdcBalance)} USDC">
+                ${formatUSDC(usdcBalance)} USDC
+            </div>
+        </div>
+        <div>
+            <div class="text-sm text-gray-500">Deposit Balance</div>
+            <div class="font-bold deposit-display" title="${formatUSDC(depositBalance)} USDC">
+                ${formatUSDC(depositBalance)} USDC
+            </div>
+        </div>
+        <div>
+            <div class="text-sm text-gray-500">Deposit Rewards</div>
+            <div class="font-bold rewards-display" title="${formatUSDC(depositRewards)} USDC">
+                ${formatUSDC(depositRewards)} USDC
+            </div>
+        </div>
+        <div>
+            <div class="text-sm text-gray-500">Referral Rewards</div>
+            <div class="font-bold referral-display" title="${formatUSDC(referralRewards)} USDC">
+                ${formatUSDC(referralRewards)} USDC
+            </div>
+        </div>
+    </div>
 
                 <!-- 操作セクション -->
                 <div class="p-4 space-y-4">
@@ -1073,7 +1080,7 @@ function setupWebSocket() {
 
 // UI Update Function - 最初にこの関数を定義
     function updateUI(data) {
-        container.innerHTML = account ? createConnectedUI(data) : createUnconnectedUI();
+        container.innerHTML = account ? (data) : createUnconnectedUI();
         attachEventListeners();
     }
 
