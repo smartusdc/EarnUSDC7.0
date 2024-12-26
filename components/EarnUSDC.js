@@ -1007,7 +1007,13 @@ export const EarnUSDC = () => {
         }
     }
 
-    // Initialize
+// UI Update Function - 最初にこの関数を定義
+    function updateUI(data) {
+        container.innerHTML = account ? createConnectedUI(data) : createUnconnectedUI();
+        attachEventListeners();
+    }
+
+    // Initialize - 関数定義の後で初期化
     updateUI();
     container.cleanup = cleanup;
 
