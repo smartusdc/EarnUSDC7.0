@@ -968,6 +968,7 @@ function setupWebSocket() {
         if (wsProvider) {
             wsProvider.disconnect();
         }
+        }
 
 
  wsProvider = new Web3.providers.WebsocketProvider(
