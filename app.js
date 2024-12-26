@@ -1,7 +1,19 @@
 import { EarnUSDC } from './components/EarnUSDC.js';
 
+console.log('App initialization started');
+
 document.addEventListener('DOMContentLoaded', () => {
-    const root = document.getElementById('root');
-    const app = EarnUSDC();
-    root.appendChild(app);
+    console.log('DOM Content Loaded');
+    try {
+        const root = document.getElementById('root');
+        console.log('Root element:', root);
+        
+        const app = EarnUSDC();
+        console.log('EarnUSDC component created');
+        
+        root.appendChild(app);
+        console.log('Component mounted to DOM');
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
 });
