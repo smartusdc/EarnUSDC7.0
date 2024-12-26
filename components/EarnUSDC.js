@@ -1615,4 +1615,4 @@ const createUnconnectedUI = () => {
 updateUI();
 return container;
 
-export default EarnUSDC;
+export { EarnUSDC };
