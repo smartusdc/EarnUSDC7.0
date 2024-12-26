@@ -6,15 +6,19 @@
     <title>EarnUSDC on Base</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="./components/EarnUSDC.js"></script>
 </head>
 <body>
     <div id="root"></div>
+    <script src="./components/EarnUSDC.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const root = document.getElementById('root');
-            const app = EarnUSDC();
-            root.appendChild(app);
+            if (typeof initializeEarnUSDC === 'function') {
+                const app = initializeEarnUSDC();
+                root.appendChild(app);
+            } else {
+                console.error('EarnUSDC initialization failed: Function not found');
+            }
         });
     </script>
 </body>
