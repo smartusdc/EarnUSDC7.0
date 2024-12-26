@@ -139,21 +139,19 @@ export const EarnUSDC = () => {
     // WebSocket Provider for Events
     let wsProvider = null;
 
-// Amount Conversion with BigNumber
-    const toUSDCAmount = (amount) => {
-        try {
-            const value = amount.toString().replace(',', '');
-            const decimals = web3.utils.toBN(USDC_DECIMALS);
-            const multiplier = web3.utils.toBN(10).pow(decimals);
-            return web3.utils.toBN(
-                web3.utils.toWei(value, 'ether')
-            ).div(
-                web3.utils.toBN(web3.utils.toWei('1', 'ether'))
-            ).mul(multiplier);
-        } catch (err) {
-            throw new Error('Invalid amount format');
-        }
-    };
+// 1. 金額変換関数の修正 - 完全置換
+const toUSDCAmount = (amount) => {
+    try {
+        if (!amount) return web3.utils.toBN(0);
+        const value = amount.toString().replace(',', '');
+        const multiplier = web3.utils.toBN(10).pow(web3.utils.toBN(USDC_DECIMALS));
+        const eth = web3.utils.toWei(value, 'ether');
+        return web3.utils.toBN(eth).div(web3.utils.toBN(web3.utils.toWei('1', 'ether'))).mul(multiplier);
+    } catch (err) {
+        console.error('toUSDCAmount error:', err);
+        throw new Error('Invalid amount format');
+    }
+};
 
     const fromUSDCAmount = (amountWei) => {
         try {
