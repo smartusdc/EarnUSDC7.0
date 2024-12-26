@@ -8,7 +8,7 @@ const USDC_DECIMALS = 6;
 
 console.log('EarnUSDC module loaded');
 
-const EarnUSDC = () => {
+export const EarnUSDC = () => {
     console.log('EarnUSDC function called');
     const container = document.createElement('div');
     container.className = 'max-w-xl mx-auto p-4';
