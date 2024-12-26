@@ -1619,7 +1619,10 @@ const createUnconnectedUI = () => {
 };
 
 // 初期UI更新と要素の返却
+// ファイルの最後の部分を以下のように変更
 updateUI();
 return container;
+}
 
-export { EarnUSDC };
+// このように変更
+window.EarnUSDC = EarnUSDC;
