@@ -6,26 +6,15 @@
     <title>EarnUSDC on Base</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./components/EarnUSDC.js"></script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="module">
-        import { EarnUSDC } from './components/EarnUSDC.js';
-
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM Content Loaded');
-            try {
-                const root = document.getElementById('root');
-                console.log('Root element:', root);
-                
-                const app = EarnUSDC();
-                console.log('EarnUSDC component created');
-                
-                root.appendChild(app);
-                console.log('Component mounted to DOM');
-            } catch (error) {
-                console.error('Initialization error:', error);
-            }
+            const root = document.getElementById('root');
+            const app = EarnUSDC();
+            root.appendChild(app);
         });
     </script>
 </body>
