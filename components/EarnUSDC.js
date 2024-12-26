@@ -6,8 +6,9 @@ const CONTRACT_ADDRESS = '0x3038eBDFF5C17d9B0f07871b66FCDc7B9329fCD8';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const USDC_DECIMALS = 6;
 
-// Contract ABIs
+// Complete Contract ABI with all functions and events
 const CONTRACT_ABI = [
+    // Basic User Operations
     {
         "inputs": [
             {"internalType": "uint256", "name": "amount", "type": "uint256"},
@@ -46,9 +47,18 @@ const CONTRACT_ABI = [
         "stateMutability": "nonpayable",
         "type": "function"
     },
+
+    // User State Views
     {
         "inputs": [{"internalType": "address", "name": "", "type": "address"}],
         "name": "deposits",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "name": "depositTimestamps",
         "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
         "stateMutability": "view",
         "type": "function"
@@ -68,9 +78,16 @@ const CONTRACT_ABI = [
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "currentAPR",
+        "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "name": "userToReferralCode",
         "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "referralCodeToUser",
+        "outputs": [{"internalType": "address", "name": "", "type": "address"}],
         "stateMutability": "view",
         "type": "function"
     },
@@ -84,23 +101,414 @@ const CONTRACT_ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
-    }
+    },
     {
         "inputs": [{"internalType": "address", "name": "", "type": "address"}],
-        "name": "userToReferralCode",
+        "name": "frozenAccounts",
+        "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "name": "userRewardStats",
+        "outputs": [
+            {"internalType": "uint256", "name": "totalDepositRewards", "type": "uint256"},
+            {"internalType": "uint256", "name": "totalBonusRewards", "type": "uint256"},
+            {"internalType": "uint256", "name": "lastUpdateTimestamp", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "name": "userActivities",
+        "outputs": [
+            {"internalType": "uint256", "name": "lastActionTimestamp", "type": "uint256"},
+            {"internalType": "uint256", "name": "dailyWithdrawCount", "type": "uint256"},
+            {"internalType": "bool", "name": "isFirstDeposit", "type": "bool"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+
+    // Contract State Views
+    {
+        "inputs": [],
+        "name": "currentAPR",
         "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
         "stateMutability": "view",
         "type": "function"
     },
     {
-        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "name": "referralCodeToUser",
-        "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+        "inputs": [],
+        "name": "isDepositPaused",
+        "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "isWithdrawalPaused",
+        "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "isRewardClaimPaused",
+        "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+
+    // Rank System
+    {
+        "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "name": "ranks",
+        "outputs": [
+            {"internalType": "string", "name": "name", "type": "string"},
+            {"internalType": "uint256", "name": "threshold", "type": "uint256"},
+            {"internalType": "uint256", "name": "bonusRate", "type": "uint256"},
+            {"internalType": "bool", "name": "isActive", "type": "bool"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+        "name": "getUserRank",
+        "outputs": [
+            {"internalType": "uint256", "name": "rankId", "type": "uint256"},
+            {"internalType": "string", "name": "rankName", "type": "string"},
+            {"internalType": "uint256", "name": "bonusRate", "type": "uint256"},
+            {"internalType": "uint256", "name": "nextRankThreshold", "type": "uint256"},
+            {"internalType": "uint256", "name": "progressToNextRank", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "rankCount",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+
+    // Admin Functions
+    {
+        "inputs": [{"internalType": "uint256", "name": "_newAPR", "type": "uint256"}],
+        "name": "updateAPR",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "uint256", "name": "_referrerRate", "type": "uint256"},
+            {"internalType": "uint256", "name": "_referredRate", "type": "uint256"}
+        ],
+        "name": "updateReferralRewardRates",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "toggleDepositPause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "toggleWithdrawalPause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "toggleRewardClaimPause",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "address", "name": "account", "type": "address"},
+            {"internalType": "bool", "name": "frozen", "type": "bool"}
+        ],
+        "name": "setAccountFrozen",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "string", "name": "name", "type": "string"},
+            {"internalType": "uint256", "name": "threshold", "type": "uint256"},
+            {"internalType": "uint256", "name": "bonusRate", "type": "uint256"},
+            {"internalType": "bool", "name": "isActive", "type": "bool"}
+        ],
+        "name": "addRank",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "removeLastRank",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"internalType": "uint256", "name": "rankId", "type": "uint256"},
+            {"internalType": "string", "name": "name", "type": "string"},
+            {"internalType": "uint256", "name": "threshold", "type": "uint256"},
+            {"internalType": "uint256", "name": "bonusRate", "type": "uint256"},
+            {"internalType": "bool", "name": "isActive", "type": "bool"}
+        ],
+        "name": "updateRankConfig",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "newThreshold", "type": "uint256"}],
+        "name": "setSuspiciousWithdrawalThreshold",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "address", "name": "_wallet", "type": "address"}],
+        "name": "setOperationalWallet",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "_amount", "type": "uint256"}],
+        "name": "setMinContractBalance",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+        "name": "adjustOperationalFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+        "name": "returnOperationalFunds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+
+    // Advanced View Functions
+    {
+        "inputs": [],
+        "name": "getDetailedStats",
+        "outputs": [
+            {"internalType": "uint256", "name": "totalDeposits", "type": "uint256"},
+            {"internalType": "uint256", "name": "totalUsers", "type": "uint256"},
+            {"internalType": "uint256", "name": "totalFrozenAccounts", "type": "uint256"},
+            {"internalType": "uint256", "name": "contractBalance", "type": "uint256"},
+            {"internalType": "uint256", "name": "operationalBalance", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getSuspiciousUsers",
+        "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+        "stateMutability": "view",
+        "type": "function"
+    },
+
+    // Events
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+        ],
+        "name": "Deposit",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+        ],
+        "name": "Withdrawal",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": false, "internalType": "uint256", "name": "reward", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "bonusAmount", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "totalAccumulatedRewards", "type": "uint256"}
+        ],
+        "name": "DepositRewardClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+        ],
+        "name": "ReferralRewardClaimed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": true, "internalType": "address", "name": "referrer", "type": "address"},
+            {"indexed": false, "internalType": "uint256", "name": "referralCode", "type": "uint256"}
+        ],
+        "name": "ReferralProcessed",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": false, "internalType": "uint256", "name": "referralCode", "type": "uint256"}
+        ],
+        "name": "ReferralCodeCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "uint256", "name": "newAPR", "type": "uint256"}
+        ],
+        "name": "APRUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "uint256", "name": "referrerRate", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "referredRate", "type": "uint256"}
+        ],
+        "name": "ReferralRewardRateUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "uint256", "name": "rankId", "type": "uint256"},
+            {"indexed": false, "internalType": "string", "name": "name", "type": "string"},
+            {"indexed": false, "internalType": "uint256", "name": "threshold", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "bonusRate", "type": "uint256"},
+            {"indexed": false, "internalType": "bool", "name": "isActive", "type": "bool"}
+        ],
+        "name": "RankAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "uint256", "name": "rankId", "type": "uint256"},
+            {"indexed": false, "internalType": "string", "name": "name", "type": "string"}
+        ],
+        "name": "RankRemoved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "uint256", "name": "rankId", "type": "uint256"},
+            {"indexed": false, "internalType": "string", "name": "name", "type": "string"},
+            {"indexed": false, "internalType": "uint256", "name": "threshold", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "bonusRate", "type": "uint256"},
+            {"indexed": false, "internalType": "bool", "name": "isActive", "type": "bool"}
+        ],
+        "name": "RankConfigUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "string", "name": "functionType", "type": "string"},
+            {"indexed": false, "internalType": "bool", "name": "isPaused", "type": "bool"}
+        ],
+        "name": "PauseStatusChanged",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "account", "type": "address"},
+            {"indexed": false, "internalType": "bool", "name": "frozen", "type": "bool"}
+        ],
+        "name": "AccountFrozen",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+            {"indexed": false, "internalType": "string", "name": "activityType", "type": "string"},
+            {"indexed": false, "internalType": "uint256", "name": "count", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+        ],
+        "name": "SuspiciousActivity",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "uint256", "name": "oldThreshold", "type": "uint256"},
+            {"indexed": false, "internalType": "uint256", "name": "newThreshold", "type": "uint256"}
+        ],
+        "name": "SuspiciousThresholdUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "address", "name": "newWallet", "type": "address"}
+        ],
+        "name": "OperationalWalletUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "uint256", "name": "newMinBalance", "type": "uint256"}
+        ],
+        "name": "MinContractBalanceUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+            {"indexed": false, "internalType": "bool", "name": "isWithdrawal", "type": "bool"}
+        ],
+        "name": "OperationalFundsAdjusted",
+        "type": "event"
     }
 ];
 
+// USDC Token ABI
 const USDC_ABI = [
     {
         "inputs": [{"name": "owner", "type": "address"}],
@@ -128,8 +536,31 @@ const USDC_ABI = [
         "outputs": [{"name": "", "type": "uint256"}],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {"name": "from", "type": "address"},
+            {"name": "to", "type": "address"},
+            {"name": "amount", "type": "uint256"}
+        ],
+        "name": "transferFrom",
+        "outputs": [{"name": "", "type": "bool"}],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {"name": "to", "type": "address"},
+            {"name": "amount", "type": "uint256"}
+        ],
+        "name": "transfer",
+        "outputs": [{"name": "", "type": "bool"}],
+        "stateMutability": "nonpayable",
+        "type": "function"
     }
 ];
+
+                
 
 export const EarnUSDC = () => {
     const container = document.createElement('div');
