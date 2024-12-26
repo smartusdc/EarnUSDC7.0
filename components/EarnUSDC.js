@@ -463,6 +463,29 @@ export const EarnUSDC = () => {
         }
     }
 
+    async function handleApplyReferral() {
+    if (!web3 || !account || isProcessing) return;
+
+    const referralInput = document.querySelector('#referralCodeInput');
+    if (!referralInput?.value || !/^\d{6}$/.test(referralInput.value)) {
+        showError('Please enter a valid 6-digit referral code');
+        return;
+    }
+
+    setProcessing(true);
+    try {
+        // リファラルコードの適用は次回デポジット時に行われるため
+        // ここではバリデーションのみ
+        await contract.methods.referralCodeToUser(referralInput.value).call();
+        showSuccess('Referral code will be applied on your next deposit');
+        referralInput.value = '';
+    } catch (err) {
+        showError('Invalid referral code');
+    } finally {
+        setProcessing(false);
+    }
+}
+
     async function handleClaimDepositReward() {
         if (!web3 || !account || isProcessing) return;
 
