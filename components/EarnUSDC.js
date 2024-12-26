@@ -1624,5 +1624,37 @@ updateUI();
 return container;
 }
 
-// このように変更
-window.EarnUSDC = EarnUSDC;
+// EarnUSDC.jsの最後の部分（約1625行目付近）を以下のように変更
+
+// 既存のexport文を削除
+// export default EarnUSDC;  この行を削除
+
+// 代わりに以下を追加
+function initializeEarnUSDC() {
+    const container = document.createElement('div');
+    container.className = 'max-w-xl mx-auto p-4';
+    
+    // State Management
+    let web3;
+    let account = '';
+    let contract;
+    let usdcContract;
+    let isProcessing = false;
+    let txNonce = null;
+    
+    // Contract State
+    let currentAPRValue = 2400;    // 24.00%
+    let referrerRate = 500;        // 5.00%
+    let referredRate = 700;        // 7.00%
+    let userReferralState = null;
+    let updateInterval = null;
+
+    // 既存のすべての関数定義をここに移動
+    
+    // 初期UI更新
+    updateUI();
+    return container;
+}
+
+// グローバルスコープで利用可能にする
+window.initializeEarnUSDC = initializeEarnUSDC;
