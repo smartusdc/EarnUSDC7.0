@@ -962,10 +962,23 @@ export const EarnUSDC = () => {
     }
 
     // WebSocket Setup for Events
-    function setupWebSocket() {
+// setupWebSocket関数を以下に置き換え
+function setupWebSocket() {
+    try {
         if (wsProvider) {
             wsProvider.disconnect();
         }
+
+        // WebSocketが利用できない場合は定期的なポーリングにフォールバック
+        updateInterval = setInterval(updateContractState, 30000);
+    } catch (err) {
+        console.warn('WebSocket setup failed, falling back to polling');
+        // エラーが発生しても定期的な更新は継続
+        if (!updateInterval) {
+            updateInterval = setInterval(updateContractState, 30000);
+        }
+    }
+}
 
  wsProvider = new Web3.providers.WebsocketProvider(
     'wss://base.getblock.io/websocket'  // あるいは他の有効なBase NetworkのWebSocket URL
