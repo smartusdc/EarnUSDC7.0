@@ -153,16 +153,19 @@ const toUSDCAmount = (amount) => {
     }
 };
 
-    const fromUSDCAmount = (amountWei) => {
-        try {
-            const amount = web3.utils.toBN(amountWei);
-            const decimals = web3.utils.toBN(USDC_DECIMALS);
-            const divisor = web3.utils.toBN(10).pow(decimals);
-            return amount.div(divisor).toString();
-        } catch (err) {
-            throw new Error('Invalid wei amount');
-        }
-    };
+// 2. USDC表示金額変換関数の修正 - 完全置換
+const fromUSDCAmount = (amountWei) => {
+    try {
+        if (!amountWei) return '0';
+        const amount = web3.utils.toBN(amountWei);
+        const divisor = web3.utils.toBN(10).pow(web3.utils.toBN(USDC_DECIMALS));
+        const converted = amount.div(divisor);
+        return converted.toString();
+    } catch (err) {
+        console.error('fromUSDCAmount error:', err);
+        return '0';
+    }
+};
 
     const formatUSDC = (amount) => {
         try {
