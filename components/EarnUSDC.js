@@ -964,12 +964,9 @@ export const EarnUSDC = () => {
     // WebSocket Setup for Events
 // setupWebSocket関数を以下に置き換え
 function setupWebSocket() {
-    try {
         if (wsProvider) {
             wsProvider.disconnect();
         }
-        }
-
 
  wsProvider = new Web3.providers.WebsocketProvider(
     'wss://base.getblock.io/websocket'  // あるいは他の有効なBase NetworkのWebSocket URL
