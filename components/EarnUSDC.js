@@ -505,7 +505,7 @@ const CONTRACT_ABI = [
         ],
         "name": "OperationalFundsAdjusted",
         "type": "event"
-    }
+    },
     {
     "inputs": [{"internalType": "address", "name": "", "type": "address"}],
     "name": "userToReferralCode",
