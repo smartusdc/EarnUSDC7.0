@@ -5,10 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EarnUSDC on Base</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <div id="root"></div>
-    <script type="module" src="./app.js"></script>
+    <script type="module">
+        import { EarnUSDC } from './components/EarnUSDC.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded');
+            try {
+                const root = document.getElementById('root');
+                console.log('Root element:', root);
+                
+                const app = EarnUSDC();
+                console.log('EarnUSDC component created');
+                
+                root.appendChild(app);
+                console.log('Component mounted to DOM');
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        });
+    </script>
 </body>
 </html>
