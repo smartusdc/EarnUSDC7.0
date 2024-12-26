@@ -955,58 +955,92 @@ async function handleGenerateReferral() {
         setTimeout(() => infoDiv.remove(), 5000);
     }
 
-    // Web3 Connection Management
-    async function initWeb3() {
-        try {
-            if (!window.ethereum) {
-                showError('Please install MetaMask');
+    // Web3 Connection Management - 完全置換
+async function initWeb3() {
+    try {
+        if (!window.ethereum) {
+            showError('Please install MetaMask');
+            return;
+        }
+
+        // Web3インスタンスの初期化
+        web3 = new Web3(window.ethereum);
+        
+        // ウォレットへの接続要求
+        console.log('Requesting wallet connection...');
+        const accounts = await window.ethereum.request({ 
+            method: 'eth_requestAccounts' 
+        });
+        
+        if (!accounts || accounts.length === 0) {
+            throw new Error('No accounts found');
+        }
+
+        account = accounts[0];
+        console.log('Connected to account:', account);
+
+        // チェーンIDの確認
+        const chainId = await web3.eth.getChainId();
+        console.log('Current chainId:', chainId);
+        
+        if (chainId.toString() !== BASE_NETWORK_ID) {
+            console.log('Switching to Base Network...');
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: web3.utils.toHex(BASE_NETWORK_ID) }],
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    showError('Please add Base Network to MetaMask');
+                } else {
+                    throw new Error('Please switch to Base Network');
+                }
                 return;
             }
-
-            web3 = new Web3(window.ethereum);
-            
-            // Check network
-            const chainId = await web3.eth.getChainId();
-            if (chainId.toString() !== BASE_NETWORK_ID) {
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: web3.utils.toHex(BASE_NETWORK_ID) }],
-                    });
-                } catch (err) {
-                    showError('Please switch to Base Network');
-                    return;
-                }
-            }
-
-            // Request account access
-            const accounts = await window.ethereum.request({ 
-                method: 'eth_requestAccounts' 
-            });
-            account = accounts[0];
-
-            // Initialize contracts
-            contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-            usdcContract = new web3.eth.Contract(USDC_ABI, USDC_ADDRESS);
-
-            // Setup WebSocket provider for events
-            setupWebSocket();
-
-            // Setup event listeners
-            window.ethereum.on('accountsChanged', handleAccountsChanged);
-            window.ethereum.on('chainChanged', handleChainChanged);
-
-            // Initial state update
-            await updateContractState();
-            
-            // Start periodic updates
-            updateInterval = setInterval(updateContractState, 30000);
-
-            showSuccess('Connected successfully');
-        } catch (err) {
-            showError('Failed to connect: ' + err.message);
         }
+
+        // コントラクトのインスタンス化
+        console.log('Initializing contracts...');
+        contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+        usdcContract = new web3.eth.Contract(USDC_ABI, USDC_ADDRESS);
+
+        // イベントリスナーのセットアップ
+        console.log('Setting up event listeners...');
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged);
+
+        // WebSocketの設定
+        setupWebSocket();
+
+        // 初期状態の更新
+        await updateContractState();
+        
+        // 定期更新の開始
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+        updateInterval = setInterval(updateContractState, 30000);
+
+        showSuccess('Connected to wallet successfully');
+        
+        // UI更新の呼び出し
+        updateUI();
+
+    } catch (err) {
+        console.error('Wallet connection error:', err);
+        showError('Failed to connect: ' + err.message);
+        
+        // エラー時のクリーンアップ
+        account = '';
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+        updateUI();
     }
+}
 
     // WebSocket Setup for Events
 // setupWebSocket関数を以下に置き換え
@@ -1045,22 +1079,43 @@ function setupWebSocket() {
         .on('error', console.error);
     }
 
-    // Account Change Handler
-    function handleAccountsChanged(accounts) {
-        if (accounts.length === 0) {
-            account = '';
-            updateUI();
-        } else if (accounts[0] !== account) {
-            account = accounts[0];
-            txNonce = null;  // Reset nonce on account change
-            updateContractState();
+// Event Handlers - 完全置換
+function handleAccountsChanged(accounts) {
+    console.log('Accounts changed:', accounts);
+    if (accounts.length === 0) {
+        account = '';
+        if (updateInterval) {
+            clearInterval(updateInterval);
         }
+        updateUI();
+        showError('Please connect your wallet');
+    } else if (accounts[0] !== account) {
+        account = accounts[0];
+        txNonce = null;  // Reset nonce
+        updateContractState().then(() => {
+            updateUI();
+            showSuccess('Account switched successfully');
+        }).catch(err => {
+            console.error('Failed to update state after account change:', err);
+            showError('Failed to update account state');
+        });
     }
+}
 
-    // Network Change Handler
-    function handleChainChanged() {
-        window.location.reload();
+// Chain Change Handler - 完全置換
+function handleChainChanged(chainId) {
+    console.log('Chain changed:', chainId);
+    if (chainId.toString() !== BASE_NETWORK_ID) {
+        showError('Please switch to Base Network');
+        account = '';
+        if (updateInterval) {
+            clearInterval(updateInterval);
+        }
+        updateUI();
+    } else {
+        initWeb3(); // Re-initialize on correct network
     }
+}
 
     // Cleanup
     function cleanup() {
@@ -1078,17 +1133,46 @@ function setupWebSocket() {
         }
     }
 
-// UI Update Function - 最初にこの関数を定義
-    function updateUI(data) {
-        container.innerHTML = account ? (data) : createUnconnectedUI();
-        attachEventListeners();
+// UI更新関数の修正 - 完全置換
+function updateUI(data = {}) {
+    console.log('Updating UI with data:', data);
+    console.log('Current account:', account);
+    
+    // アカウントの存在チェック
+    if (!account) {
+        container.innerHTML = createUnconnectedUI();
+    } else {
+        container.innerHTML = createConnectedUI(data);
     }
+    
+    attachEventListeners();
+}
 
-    // Initialize - 関数定義の後で初期化
-    updateUI();
-    container.cleanup = cleanup;
+// Wallet Connect Button Event Listener - container作成時に追加
+const createUnconnectedUI = () => {
+    return `
+        <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+            <div class="bg-blue-50 p-4 border-b sticky top-0">
+                <div class="text-2xl font-bold text-center">
+                    Current APR: ${(currentAPRValue/100).toFixed(2)}%
+                </div>
+                <div class="text-sm text-gray-600 text-center mt-2">
+                    Referral Rewards: Referrer ${(referrerRate/100).toFixed(2)}%, 
+                    Referred ${(referredRate/100).toFixed(2)}%
+                </div>
+            </div>
 
-    return container;
+            <div class="p-6">
+                <button id="connectWalletBtn" 
+                        class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    Connect Wallet
+                </button>
+                <p class="text-sm text-gray-600 text-center mt-2">
+                    Please connect your wallet to continue
+                </p>
+            </div>
+        </div>
+    `;
 };
 
 export default EarnUSDC;
