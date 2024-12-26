@@ -1611,4 +1611,8 @@ const createUnconnectedUI = () => {
     `;
 };
 
+// 初期UI更新と要素の返却
+updateUI();
+return container;
+
 export default EarnUSDC;
