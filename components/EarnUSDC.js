@@ -167,16 +167,21 @@ const fromUSDCAmount = (amountWei) => {
     }
 };
 
-    const formatUSDC = (amount) => {
-        try {
-            return Number(amount).toLocaleString('en-US', {
-                minimumFractionDigits: USDC_DECIMALS,
-                maximumFractionDigits: USDC_DECIMALS
-            });
-        } catch (err) {
-            return '0.000000';
-        }
-    };
+// 3. USDC金額フォーマット関数の修正 - 完全置換
+const formatUSDC = (amount) => {
+    try {
+        if (!amount) return '0.000000';
+        const num = Number(amount);
+        if (isNaN(num)) return '0.000000';
+        return num.toLocaleString('en-US', {
+            minimumFractionDigits: 6,
+            maximumFractionDigits: 6
+        });
+    } catch (err) {
+        console.error('formatUSDC error:', err);
+        return '0.000000';
+    }
+};
 
     // Dynamic Gas Price Management
     async function getCurrentGasPrice() {
@@ -331,53 +336,75 @@ const fromUSDCAmount = (amountWei) => {
             });
     }
 
-// Contract State Management
-    async function updateContractState() {
-        if (!web3 || !account || !contract || !usdcContract) return;
+// 4. コントラクト状態更新関数の修正 - 完全置換
+async function updateContractState() {
+    if (!web3 || !account || !contract || !usdcContract) return;
 
-        try {
-            // Get all state in parallel
-            const [
-                baseAPR,
-                referralInfo,
-                depositBalance,
-                depositRewardBalance,
-                referralRewardBalance,
-                usdcBalance
-            ] = await Promise.all([
-                contract.methods.currentAPR().call(),
-                contract.methods.userReferrals(account).call(),
-                contract.methods.deposits(account).call(),
-                contract.methods.depositRewards(account).call(),
-                contract.methods.referralRewards(account).call(),
-                usdcContract.methods.balanceOf(account).call()
-            ]);
+    try {
+        console.log('Updating contract state for account:', account);
 
-            // Update contract state
-            currentAPRValue = parseInt(baseAPR);
-            userReferralState = referralInfo;
+        const [
+            baseAPR,
+            referralInfo,
+            depositBalance,
+            depositRewardBalance,
+            referralRewardBalance,
+            usdcBalance,
+            userReferralCode
+        ] = await Promise.all([
+            contract.methods.currentAPR().call(),
+            contract.methods.userReferrals(account).call(),
+            contract.methods.deposits(account).call(),
+            contract.methods.depositRewards(account).call(),
+            contract.methods.referralRewards(account).call(),
+            usdcContract.methods.balanceOf(account).call(),
+            contract.methods.userToReferralCode(account).call()
+        ]);
 
-            // Calculate effective APR including referral bonus if applicable
-            const effectiveAPR = referralInfo.exists ? 
-                currentAPRValue + referredRate : 
-                currentAPRValue;
+           // デバッグログ
+        console.log('Raw values from contract:', {
+            baseAPR,
+            referralInfo,
+            depositBalance,
+            depositRewardBalance,
+            referralRewardBalance,
+            usdcBalance,
+            userReferralCode
+        });
 
-            // Update UI
-            updateUI({
-                depositBalance: fromUSDCAmount(depositBalance),
-                depositRewards: fromUSDCAmount(depositRewardBalance),
-                referralRewards: fromUSDCAmount(referralRewardBalance),
-                usdcBalance: fromUSDCAmount(usdcBalance),
-                effectiveAPR: effectiveAPR,
-                referralCode: referralInfo.referralCode > 0 ? 
-                    referralInfo.referralCode.toString().padStart(6, '0') : ''
-            });
+        // 状態更新
+        currentAPRValue = parseInt(baseAPR);
+        userReferralState = referralInfo;
 
-        } catch (err) {
-            console.error('Failed to update contract state:', err);
-            showError('Failed to update state');
-        }
+        const effectiveAPR = referralInfo.exists ? 
+            currentAPRValue + referredRate : 
+            currentAPRValue;
+
+        // 変換後の値をログ
+        const convertedValues = {
+            depositBalance: fromUSDCAmount(depositBalance),
+            depositRewards: fromUSDCAmount(depositRewardBalance),
+            referralRewards: fromUSDCAmount(referralRewardBalance),
+            usdcBalance: fromUSDCAmount(usdcBalance),
+        };
+        console.log('Converted values:', convertedValues);
+
+        // UI更新
+        updateUI({
+            depositBalance: convertedValues.depositBalance,
+            depositRewards: convertedValues.depositRewards,
+            referralRewards: convertedValues.referralRewards,
+            usdcBalance: convertedValues.usdcBalance,
+            effectiveAPR: effectiveAPR,
+            referralCode: userReferralCode > 0 ? 
+                userReferralCode.toString().padStart(6, '0') : ''
+        });
+
+    } catch (err) {
+        console.error('Failed to update contract state:', err);
+        showError('Failed to update state');
     }
+}
 
     // Contract Operations
     async function handleDeposit() {
@@ -531,27 +558,39 @@ const fromUSDCAmount = (amountWei) => {
         }
     }
 
-    async function handleGenerateReferral() {
-        if (!web3 || !account || isProcessing) return;
+ // 5. リファラル生成関数の修正 - 完全置換
+async function handleGenerateReferral() {
+    if (!web3 || !account || isProcessing) return;
 
-        setProcessing(true);
-        try {
-            const referralInfo = await contract.methods.userReferrals(account).call();
-            if (referralInfo.exists && referralInfo.referralCode > 0) {
-                throw new Error('You already have a referral code');
-            }
-
-            await sendTransaction(
-                contract.methods.generateReferralCode()
-            );
-
-            await updateContractState();
-        } catch (err) {
-            showError(err.message);
-        } finally {
-            setProcessing(false);
+    setProcessing(true);
+    try {
+        console.log('Checking existing referral code for:', account);
+        
+        // 既存コードチェック
+        const existingCode = await contract.methods.userToReferralCode(account).call();
+        console.log('Existing referral code:', existingCode);
+        
+        if (existingCode > 0) {
+            throw new Error('You already have a referral code');
         }
+
+        // コード生成
+        console.log('Generating new referral code...');
+        await sendTransaction(
+            contract.methods.generateReferralCode()
+        );
+
+        // 即時状態更新
+        await updateContractState();
+        showSuccess('Referral code generated successfully');
+        
+    } catch (err) {
+        console.error('Generate referral error:', err);
+        showError(err.message);
+    } finally {
+        setProcessing(false);
     }
+}
 
 // UI Components
     function createUnconnectedUI() {
