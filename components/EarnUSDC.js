@@ -506,6 +506,20 @@ const CONTRACT_ABI = [
         "name": "OperationalFundsAdjusted",
         "type": "event"
     }
+    {
+    "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "name": "userToReferralCode",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+},
+{
+    "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "name": "referralCodeToUser",
+    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+    "stateMutability": "view",
+    "type": "function"
+}
 ];
 
 // USDC Token ABI
@@ -1038,29 +1052,6 @@ async function handleGenerateReferral() {
 }
 
 // UI Components
-    function createUnconnectedUI() {
-        return `
-            <div class="bg-white shadow-xl rounded-lg overflow-hidden">
-                <!-- レート情報（固定表示） -->
-                <div class="bg-blue-50 p-4 border-b sticky top-0">
-                    <div class="text-2xl font-bold text-center">
-                        Current APR: ${(currentAPRValue/100).toFixed(2)}%
-                    </div>
-                    <div class="text-sm text-gray-600 text-center mt-2">
-                        Referral Rewards: Referrer ${(referrerRate/100).toFixed(2)}%, 
-                        Referred ${(referredRate/100).toFixed(2)}%
-                    </div>
-                </div>
-
-                <div class="p-6">
-                    <button id="connectWalletBtn" 
-                            class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                        Connect Wallet
-                    </button>
-                </div>
-            </div>
-        `;
-    }
 
     function createConnectedUI(data = {}) {
         const { 
