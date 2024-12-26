@@ -6,6 +6,13 @@ const CONTRACT_ADDRESS = '0x3038eBDFF5C17d9B0f07871b66FCDc7B9329fCD8';
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 const USDC_DECIMALS = 6;
 
+console.log('EarnUSDC module loaded');
+
+const EarnUSDC = () => {
+    console.log('EarnUSDC function called');
+    const container = document.createElement('div');
+    container.className = 'max-w-xl mx-auto p-4';
+    
 // Complete Contract ABI with all functions and events
 const CONTRACT_ABI = [
     // Basic User Operations
