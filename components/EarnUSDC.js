@@ -576,7 +576,7 @@ const USDC_ABI = [
 
                 
 
-export const EarnUSDC = () => {
+const EarnUSDC = () => {
     const container = document.createElement('div');
     container.className = 'max-w-xl mx-auto p-4';
 
